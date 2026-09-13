@@ -99,3 +99,51 @@ if "DATA" in df.columns:
 # 3.6 Salvar base limpa
 df.to_csv("Varejo_Limpo.csv", index=False, encoding="utf-8")
 print("\n💾 Base limpa salva como 'Varejo_Limpo.csv'") 
+
+# -------------------------------------------------------------------
+# # -------------------------------------------------------------------
+# ETAPA 4 ESTATÍSTICA DESCRITIVA: Número de Filhos do Cliente
+# -------------------------------------------------------------------
+print("\n" + "=" * 60)
+print("4. ESTATÍSTICA DESCRITIVA — NÚMERO DE FILHOS DO CLIENTE")
+print("=" * 60)
+
+# Verifica se a coluna existe (CL_FHL = Número de filhos)
+coluna_filhos = "CL_FHL"
+
+if coluna_filhos in df.columns:
+    # Remove valores nulos para o cálculo
+    dados_filhos = df[coluna_filhos].dropna()
+    
+    # Cálculos estatísticos
+    total_clientes = len(dados_filhos)
+    media = dados_filhos.mean()
+    mediana = dados_filhos.median()
+    moda = dados_filhos.mode().tolist()
+    desvio_padrao = dados_filhos.std()
+    valor_min = dados_filhos.min()
+    valor_max = dados_filhos.max()
+    q1 = dados_filhos.quantile(0.25)
+    q3 = dados_filhos.quantile(0.75)
+    
+    # Exibição dos resultados
+    print(f"→ Total de clientes analisados: {total_clientes}")
+    print(f"→ Média de filhos: {media:.2f}")
+    print(f"→ Mediana de filhos: {mediana:.0f}")
+    print(f"→ Moda de filhos: {', '.join(map(str, moda))} filhos (valor mais frequente)")
+    print(f"→ Desvio Padrão: {desvio_padrao:.2f}")
+    print(f"→ Valor MÍNIMO: {valor_min:.0f} filho(s)")
+    print(f"→ Valor MÁXIMO: {valor_max:.0f} filhos")
+    print(f"→ 1º Quartil (25% dos clientes): até {q1:.0f} filho(s)")
+    print(f"→ 3º Quartil (75% dos clientes): até {q3:.0f} filho(s)")
+    
+    # Distribuição por quantidade
+    print("\n→ Distribuição — Quantidade de filhos vs Quantidade de clientes:")
+    distribuicao = dados_filhos.value_counts().sort_index()
+    for qtd, qtd_clientes in distribuicao.items():
+        porcentagem = (qtd_clientes / total_clientes) * 100
+        print(f"   {qtd:.0f} filho(s): {qtd_clientes} clientes ({porcentagem:.1f}%)")
+
+else:
+    print(f"⚠️ Coluna '{coluna_filhos}' não encontrada!")
+    print(f"Colunas disponíveis: {list(df.columns)}")

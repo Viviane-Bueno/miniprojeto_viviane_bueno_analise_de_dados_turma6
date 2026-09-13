@@ -47,4 +47,55 @@ if "DATA" in df.columns:
     df["DATA_convertida"] = pd.to_datetime(df["DATA"], errors="coerce")
     datas_invalidas = df["DATA_convertida"].isnull().sum()
     print(f"Quantidade de datas não reconhecidas: {datas_invalidas}")
-#
+    
+   # -------------------------------------------------------------------
+# ETAPA 3 — LIMPEZA E AJUSTE DE TIPOS
+# -------------------------------------------------------------------
+print("\n" + "=" * 60)
+print("3. LIMPEZA E AJUSTE DE TIPOS")
+print("=" * 60)
+
+# 3.1 Tratar valores ausentes ("#N/D" → valor nulo padrão)
+df = df.replace("#N/D", np.nan)
+
+# 3.2 Tratar o produto PR_ID=107 ANTES de preencher nulos
+if "PR_ID" in df.columns and "PR_NOME" in df.columns:
+    df.loc[df["PR_ID"] == 107, "PR_CAT"] = "SEM CATEGORIA"
+    df.loc[df["PR_ID"] == 107, "PR_NOME"] = "PRODUTO SEM CADASTRO"
+    print("✅ PR_ID=107: categorizado como 'PRODUTO SEM CADASTRO'")
+
+# 3.3 Decisão sobre nulos
+colunas_com_nulos = df.columns[df.isnull().any()].tolist()
+
+for col in colunas_com_nulos:
+    pct_nulos = df[col].isnull().sum() / len(df)
+    
+    if pct_nulos < 0.05:  # Menos de 5% nulos
+        if df[col].dtype == "object":
+            # ✅ Coluna de TEXTO → usa MODA (com proteção!)
+            moda = df[col].mode()
+            if not moda.empty:
+                df[col] = df[col].fillna(moda[0])
+                print(f"✅ Coluna {col}: nulos substituídos pela moda")
+            else:
+                print(f"⚠️ Coluna {col}: sem moda → mantém nulos")
+        else:
+            # ✅ Coluna de NÚMERO → usa MEDIANA
+            df[col] = df[col].fillna(df[col].median())
+            print(f"✅ Coluna {col}: nulos substituídos pela mediana")
+    else:
+        print(f"⚠️ Coluna {col}: mantém nulos ({round(pct_nulos*100,1)}%) — analisar depois")
+
+# 3.4 Remover duplicatas
+qtd_antes = len(df)
+df = df.drop_duplicates()
+print(f"✅ Duplicatas removidas: {qtd_antes - len(df)} linhas")
+
+# 3.5 ✅ Converter datas com formato BRASILEIRO!
+if "DATA" in df.columns:
+    df["DATA"] = pd.to_datetime(df["DATA"], dayfirst=True, errors="coerce")
+    print(f"✅ Coluna DATA convertida. Datas inválidas: {df['DATA'].isnull().sum()}")
+
+# 3.6 Salvar base limpa
+df.to_csv("Varejo_Limpo.csv", index=False, encoding="utf-8")
+print("\n💾 Base limpa salva como 'Varejo_Limpo.csv'") 

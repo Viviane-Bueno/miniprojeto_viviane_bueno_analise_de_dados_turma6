@@ -147,3 +147,114 @@ if coluna_filhos in df.columns:
 else:
     print(f"⚠️ Coluna '{coluna_filhos}' não encontrada!")
     print(f"Colunas disponíveis: {list(df.columns)}")
+    
+# -------------------------------------------------------------------
+# # -------------------------------------------------------------------
+# ETAPA 5 — EXPLORAR PADRÕES DE AGRUPAMENTO E CONCLUSÕES
+# -------------------------------------------------------------------
+print("\n" + "=" * 70)
+print("5. PADRÕES DE AGRUPAMENTO E CONCLUSÕES")
+print("=" * 70)
+
+# ======================
+# AGRUPAMENTO 1 — Compras por Gênero
+# ======================
+print("\n📌 AGRUPAMENTO 1 — Compras por Gênero")
+if "CL_GENERO" in df.columns and "CO_ID" in df.columns:
+    # Quantas compras únicas cada gênero fez
+    compras_genero = df.groupby("CL_GENERO")["CO_ID"].nunique()
+    # Quantos itens no total cada gênero comprou
+    itens_genero = df.groupby("CL_GENERO").size()
+    # Média de itens por compra
+    media_itens_genero = itens_genero / compras_genero
+
+    # Monta tabela de resultados
+    resumo_genero = pd.DataFrame({
+        "Compras Únicas": compras_genero,
+        "Total de Itens": itens_genero,
+        "Média de Itens/Compra": media_itens_genero.round(2)
+    })
+    print(resumo_genero)
+    
+    # Gênero com mais compras
+    genero_lider = compras_genero.idxmax()
+    qtd_genero_lider = compras_genero.max()
+    print(f"\n🏆 Gênero com mais compras: {genero_lider} ({qtd_genero_lider:,} compras)")
+else:
+    print("⚠️ Colunas CL_GENERO ou CO_ID não encontradas.")
+
+# ======================
+# AGRUPAMENTO 2 — Itens por Categoria de Produto
+# ======================
+print("\n📌 AGRUPAMENTO 2 — Itens Comprados por Categoria")
+if "PR_CAT" in df.columns:
+    qtd_categoria = df["PR_CAT"].value_counts()
+    pct_categoria = (qtd_categoria / len(df) * 100).round(1)
+
+    resumo_categoria = pd.DataFrame({
+        "Quantidade de Itens": qtd_categoria,
+        "Participação (%)": pct_categoria
+    })
+    print(resumo_categoria)
+    
+    # Categoria mais comprada
+    cat_lider = qtd_categoria.idxmax()
+    qtd_cat_lider = qtd_categoria.max()
+    print(f"\n🏆 Categoria mais comprada: {cat_lider} ({qtd_cat_lider:,} itens)")
+else:
+    print("⚠️ Coluna PR_CAT não encontrada.")
+
+# ======================
+# AGRUPAMENTO 3 — Compras por Número de Filhos
+# ======================
+print("\n📌 AGRUPAMENTO 3 — Perfil de Compras por Número de Filhos")
+if "CL_FHL" in df.columns and "CO_ID" in df.columns:
+    compras_filhos = df.groupby("CL_FHL")["CO_ID"].nunique().sort_index()
+    print(compras_filhos)
+    
+    # Perfil com mais compras
+    perfil_lider = compras_filhos.idxmax()
+    qtd_perfil_lider = compras_filhos.max()
+    print(f"\n🏆 Perfil com mais compras: {perfil_lider} filho(s) ({qtd_perfil_lider:,} compras)")
+else:
+    print("⚠️ Colunas CL_FHL ou CO_ID não encontradas.")
+
+# -------------------------------------------------------------------
+# 💡 CONCLUSÕES E PRINCIPAIS INSIGHTS
+# -------------------------------------------------------------------
+print("\n" + "=" * 70)
+print("💡 CONCLUSÕES E PRINCIPAIS INSIGHTS")
+print("=" * 70)
+
+print("""
+1️⃣ Perfil de compras por gênero:
+   - Identifica qual gênero representa o público principal, com maior volume de compras.
+   - A média de itens por compra mostra se há diferença no tamanho das compras entre os grupos.
+
+2️⃣ Categorias de produtos:
+   - A categoria mais comprada indica o produto com maior saída e importância no varejo.
+   - Categorias com menor participação podem indicar oportunidades de ajuste de estoque ou divulgação.
+
+3️⃣ Perfil familiar e consumo:
+   - Clientes com 1 filho aparecem como o perfil mais frequente entre os compradores.
+   - Observa-se padrão de queda no número de compras à medida que aumenta o número de filhos.
+
+4️⃣ Qualidade após limpeza:
+   - Colunas 100% vazias foram removidas; linhas duplicadas foram eliminadas da base.
+   - Produto sem cadastro (PR_ID=107) foi identificado e recebeu categoria padrão.
+   - Datas convertidas com formato brasileiro permitem análises por período.
+
+5️⃣ Problemas remanescentes na base:
+   - Restam datas inválidas que não puderam ser interpretadas e precisam correção na origem.
+   - O produto PR_ID=107 permanece sem nome real, exigindo atualização no cadastro.
+   - Valores preenchidos com moda/mediana podem conter pequena distorção estatística.
+
+6️⃣ Recomendações práticas:
+   - Direcionar promoções e produtos conforme o perfil de clientes mais ativo.
+   - Corrigir as datas inválidas na fonte para permitir análises precisas por período.
+   - Rever cadastro de produtos para eliminar registros sem identificação completa.
+""")
+
+print("=" * 70)
+print("✅ ETAPA 5 CONCLUÍDA")
+print("=" * 70)
